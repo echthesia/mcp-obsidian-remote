@@ -10,7 +10,7 @@
     "dev": "tsx --watch src/index.ts"
   },
   "dependencies": {
-    "@mauricio.wolff/mcp-obsidian": "file:../mcp-obsidian",
+    "@mauricio.wolff/mcp-obsidian": "git+https://github.com/echthesia/mcp-obsidian.git#refactor/extract-transport-layer",
     "@modelcontextprotocol/sdk": "^1.20.0",
     "cors": "^2.8.5",
     "express": "^5.0.1",

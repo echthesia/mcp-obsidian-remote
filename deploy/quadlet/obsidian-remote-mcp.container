@@ -1,0 +1,22 @@
+[Unit]
+Description=OAuth-protected MCP server for Obsidian vaults
+After=network-online.target
+
+[Container]
+Image=localhost/obsidian-remote-mcp:latest
+ContainerName=obsidian-remote-mcp
+UserNS=auto
+Volume=%h/path/to/vault:/data/vault:Z,U
+EnvironmentFile=%h/.config/obsidian-remote-mcp/env
+PublishPort=127.0.0.1:3000:3000
+RunInit=true
+NoNewPrivileges=true
+
+[Service]
+Restart=on-failure
+RestartSec=10s
+TimeoutStopSec=30
+KillMode=mixed
+
+[Install]
+WantedBy=default.target

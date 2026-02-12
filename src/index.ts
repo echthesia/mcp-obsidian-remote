@@ -356,14 +356,16 @@ async function main(): Promise<void> {
   });
 
   // 13. Graceful shutdown
-  process.on("SIGINT", async () => {
-    console.log("\nShutting down...");
+  async function shutdown(signal: string): Promise<void> {
+    console.log(`\n${signal} received, shutting down...`);
     for (const [sid, transport] of Object.entries(transports)) {
       console.log(`Closing session ${sid}`);
       await transport.close();
     }
     process.exit(0);
-  });
+  }
+  process.on("SIGINT", () => shutdown("SIGINT"));
+  process.on("SIGTERM", () => shutdown("SIGTERM"));
 }
 
 main().catch((err) => {
