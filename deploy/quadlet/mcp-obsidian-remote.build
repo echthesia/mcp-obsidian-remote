@@ -1,0 +1,4 @@
+[Build]
+ImageTag=localhost/mcp-obsidian-remote:latest
+File=/opt/mcp-obsidian-remote/Containerfile
+SetWorkingDirectory=/opt/mcp-obsidian-remote

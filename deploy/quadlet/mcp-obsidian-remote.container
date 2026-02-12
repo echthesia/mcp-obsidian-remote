@@ -3,11 +3,11 @@ Description=OAuth-protected MCP server for Obsidian vaults
 After=network-online.target
 
 [Container]
-Image=localhost/obsidian-remote-mcp:latest
-ContainerName=obsidian-remote-mcp
+Image=mcp-obsidian-remote.build
+ContainerName=mcp-obsidian-remote
 UserNS=auto
-Volume=%h/path/to/vault:/data/vault:Z,U
-EnvironmentFile=%h/.config/obsidian-remote-mcp/env
+Volume=/path/to/vault:/data/vault:Z,U
+EnvironmentFile=/etc/mcp-obsidian-remote/env
 PublishPort=127.0.0.1:3000:3000
 RunInit=true
 NoNewPrivileges=true
@@ -19,4 +19,4 @@ TimeoutStopSec=30
 KillMode=mixed
 
 [Install]
-WantedBy=default.target
+WantedBy=multi-user.target
