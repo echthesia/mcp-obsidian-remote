@@ -197,6 +197,7 @@ async function main(): Promise<void> {
 
   // 5. Express app setup
   const app = express();
+  app.set("trust proxy", "loopback, 10.88.0.0/16, 10.89.0.0/16, 10.90.0.0/16");
 
   app.use(express.json());
 
