@@ -15,13 +15,11 @@ import type { OAuthTokenVerifier } from "@modelcontextprotocol/sdk/server/auth/p
 import type { AuthInfo } from "@modelcontextprotocol/sdk/server/auth/types.js";
 import type { OAuthMetadata } from "@modelcontextprotocol/sdk/shared/auth.js";
 import { createRemoteJWKSet, jwtVerify } from "jose";
-import rateLimit from "express-rate-limit";
 
 // ---------------------------------------------------------------------------
 // Config validation
 // ---------------------------------------------------------------------------
 
-const MAX_SESSIONS = 100;
 
 function fatal(msg: string): never {
   console.error(`FATAL: ${msg}`);
@@ -208,25 +206,7 @@ async function main(): Promise<void> {
     }),
   );
 
-  // 6. Rate limiting
-  const globalLimiter = rateLimit({
-    windowMs: 60_000,
-    limit: 100,
-    standardHeaders: "draft-7",
-    legacyHeaders: false,
-    message: { error: "Too many requests, please try again later" },
-  });
-  app.use(globalLimiter);
-
-  const initLimiter = rateLimit({
-    windowMs: 60_000,
-    limit: 10,
-    standardHeaders: "draft-7",
-    legacyHeaders: false,
-    message: { error: "Too many session initializations, please try again later" },
-  });
-
-  // 7. Mount auth metadata router (unauthenticated)
+  // 6. Mount auth metadata router (unauthenticated)
   app.use(
     mcpAuthMetadataRouter({
       oauthMetadata,
@@ -258,24 +238,6 @@ async function main(): Promise<void> {
     }
 
     if (!sessionId && isInitializeRequest(req.body)) {
-      // Apply stricter rate limit to session initialization only.
-      // express-rate-limit either calls next() (allowed) or sends a 429 response (blocked).
-      const allowed = await new Promise<boolean>((resolve) => {
-        res.on("finish", () => resolve(false));
-        initLimiter(req, res, () => {
-          res.removeAllListeners("finish");
-          resolve(true);
-        });
-      });
-      if (!allowed) return;
-      // Check session cap
-      if (Object.keys(transports).length >= MAX_SESSIONS) {
-        res
-          .status(503)
-          .json({ error: "Maximum concurrent sessions reached" });
-        return;
-      }
-
       // Create new transport + server
       const transport = new StreamableHTTPServerTransport({
         sessionIdGenerator: () => randomUUID(),
