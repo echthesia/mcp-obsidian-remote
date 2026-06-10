@@ -221,8 +221,11 @@ async function main(): Promise<void> {
   // Extract allowed hosts for DNS rebinding protection
   const allowedHosts = [serverUrl.host];
 
+  // Derive MCP endpoint path from SERVER_URL
+  const mcpPath = serverUrl.pathname;
+
   // 9. POST /mcp (authenticated)
-  app.post("/mcp", authMiddleware, async (req, res) => {
+  app.post(mcpPath, authMiddleware, async (req, res) => {
     const auth = req.auth as AuthInfo;
     const sessionId = req.headers["mcp-session-id"] as string | undefined;
 
@@ -273,7 +276,7 @@ async function main(): Promise<void> {
   });
 
   // 10. GET /mcp (authenticated) - SSE stream
-  app.get("/mcp", authMiddleware, async (req, res) => {
+  app.get(mcpPath, authMiddleware, async (req, res) => {
     const auth = req.auth as AuthInfo;
     const sessionId = req.headers["mcp-session-id"] as string | undefined;
 
@@ -291,7 +294,7 @@ async function main(): Promise<void> {
   });
 
   // 11. DELETE /mcp (authenticated) - session termination
-  app.delete("/mcp", authMiddleware, async (req, res) => {
+  app.delete(mcpPath, authMiddleware, async (req, res) => {
     const auth = req.auth as AuthInfo;
     const sessionId = req.headers["mcp-session-id"] as string | undefined;
 
