@@ -1,9 +1,11 @@
 name: build-push
 
 # Build the MCP server image and push it to GHCR on every push to main. noema's
-# Quadlet unit tracks ghcr.io/echthesia/mcp-obsidian-remote:production (a moving
-# tag) with AutoUpdate=registry, so a push here → new :production digest → the
+# Quadlet unit tracks ghcr.io/echthesia/mcp-obsidian-remote:latest (a moving
+# tag) with AutoUpdate=registry, so a push here → new :latest digest → the
 # host's podman-auto-update.timer rolls it out (with healthcheck-gated rollback).
+# :latest = head of main, continuously deployed (no promotion gate); :sha pins
+# each build for provenance/rollback.
 on:
   push:
     branches: [main]
@@ -34,7 +36,7 @@ jobs:
         with:
           images: ghcr.io/echthesia/mcp-obsidian-remote
           tags: |
-            type=raw,value=production
+            type=raw,value=latest
             type=sha
 
       - name: Build and push
