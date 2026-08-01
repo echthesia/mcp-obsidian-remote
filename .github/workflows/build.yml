@@ -40,6 +40,7 @@ jobs:
             type=sha
 
       - name: Build and push
+        id: build
         uses: docker/build-push-action@v6
         with:
           context: .
@@ -47,3 +48,16 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+
+      - name: Install cosign
+        uses: sigstore/cosign-installer@v3
+
+      # Sign the pushed digest (covers every tag pointing at it) with the shared
+      # echthesia signing key. noema's policy.json (echthesia/infra) rejects
+      # unsigned ghcr.io/echthesia/* pulls, so a build that skipped this step
+      # would never deploy — fail loudly here instead.
+      - name: Sign the pushed digest
+        env:
+          COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
+          COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
+        run: cosign sign --yes --key env://COSIGN_PRIVATE_KEY "ghcr.io/echthesia/mcp-obsidian-remote@${{ steps.build.outputs.digest }}"
